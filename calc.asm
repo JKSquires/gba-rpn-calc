@@ -49,50 +49,59 @@ addge r3,r3,1
 
 tst r2,%0000000001 ; a
 bne endA
-; handle numbers
-cmp r3,5 ; check if number
-subge r6,r3,5
-mulge r4,r4,10
-addge r4,r4,r6
-bge endA
+	; handle numbers
+	cmp r3,5 ; check if number
+	subge r6,r3,5
+	mulge r4,r4,10
+	addge r4,r4,r6
+	bge endA
 
-; handle math functions
-cmp r3,4 ; add
-addeq r4,r4,r5
-moveq r4,r5
-ldreq r5,[r13],4
-beq endA
+	; handle math functions
+	cmp r3,4 ; add
+	addeq r4,r4,r5
+	moveq r4,r5
+	ldreq r5,[r13],4
+	beq endA
 
-cmp r3,3 ; subtract
-subeq r4,r4,r5
-moveq r4,r5
-ldreq r5,[r13],4
-beq endA
+	cmp r3,3 ; subtract
+	subeq r4,r4,r5
+	moveq r4,r5
+	ldreq r5,[r13],4
+	beq endA
 
-cmp r3,1 ; multiply
-muleq r4,r4,r5
-moveq r4,r5
-ldreq r5,[r13],4
-beq endA
+	cmp r3,1 ; multiply
+	muleq r4,r4,r5
+	moveq r4,r5
+	ldreq r5,[r13],4
+	beq endA
 
-cmp r3,0 ; divide
-bne endDiv
-mov r6,0
-divLoop:
-subs r5,r5,r4
-addge r6,r6,1
-bge divLoop
-mov r4,r6
-ldr r5,[r13],4
-b endA
-endDiv:
+	cmp r3,0 ; divide
+	bne endDiv
+	mov r6,0
+	divLoop:
+		subs r5,r5,r4
+		addge r6,r6,1
+		bge divLoop
+	mov r4,r6
+	ldr r5,[r13],4
+	b endA
+	endDiv:
 
-; handle clear
-cmp r3,2 ; c
-moveq r4,0
+	; handle clear
+	cmp r3,2 ; c
+	moveq r4,0
 endA:
 
 tst r2,%0000000010 ; b
+bne endB
+	mov r6,0
+	divTenLoop:
+		subs r4,r4,10
+		addge r6,r6,1
+		bge divTenLoop
+	mov r4,r6
+	b endB
+endB:
 
 tst r2,%0000000100 ; select
 streq r5,[r13,-4]!
