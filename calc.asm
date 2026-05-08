@@ -27,7 +27,7 @@ bne waitForVBlankEnd
 waitForVBlankStart:
 ldrh r2,[r0,0x4]
 tst r2,1
-beq waitForVBlankStart:
+beq waitForVBlankStart
 
 ldrh r2,[r0,0x130]
 
