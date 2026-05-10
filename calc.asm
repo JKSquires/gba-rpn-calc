@@ -29,49 +29,56 @@ ldrh r2,[r0,0x4]
 tst r2,1
 beq waitForVBlankStart
 
-ldrh r2,[r0,0x130]
+orr r6,r0,0x130
+ldrh r2,[r6]
 
 tst r2,%0010000000 ; down
-cmpeq r3,3
+bne endDown
+cmp r3,3
 subge r3,r3,3
+endDown:
 
 tst r2,%0001000000 ; up
-cmpeq r3,11
+bne endUp
+cmp r3,11
 addle r3,r3,3
+endUp:
 
 tst r2,%0000100000 ; left
-cmpeq r3,1
+bne endLeft
+cmp r3,1
 subge r3,r3,1
+endLeft:
 
 tst r2,%0000010000 ; right
-cmpeq r3,13
-addge r3,r3,1
+bne endRight
+cmp r3,13
+addle r3,r3,1
+endRight:
 
 tst r2,%0000000001 ; a
 bne endA
 	; handle numbers
 	cmp r3,5 ; check if number
 	subge r6,r3,5
-	mulge r4,r4,10
+	movge r7,10
+	mulge r4,r4,r7
 	addge r4,r4,r6
 	bge endA
 
 	; handle math functions
 	cmp r3,4 ; add
-	addeq r4,r4,r5
-	moveq r4,r5
+	addeq r4,r5,r4
 	ldreq r5,[r13],4
 	beq endA
 
 	cmp r3,3 ; subtract
-	subeq r4,r4,r5
-	moveq r4,r5
+	subeq r4,r5,r4
 	ldreq r5,[r13],4
 	beq endA
 
 	cmp r3,1 ; multiply
-	muleq r4,r4,r5
-	moveq r4,r5
+	muleq r4,r5,r4
 	ldreq r5,[r13],4
 	beq endA
 
