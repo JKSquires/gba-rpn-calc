@@ -10,7 +10,8 @@ strh r1,[r0]
 
 mov r1,0x6000000
 
-mov r3,7
+mov r3,10
+mvn r8,0
 
 mainLoop:
 ; r0 I/O reg
@@ -19,6 +20,7 @@ mainLoop:
 ; r3 Selection
 ; r4 X
 ; r5 Y
+; r8 Previous Key Input
 
 waitForVBlankEnd:
 ldrh r2,[r0,0x4]
@@ -34,30 +36,40 @@ ldrh r2,[r6]
 
 tst r2,%0010000000 ; down
 bne endDown
+tst r8,%0010000000
+beq endDown
 cmp r3,3
 subge r3,r3,3
 endDown:
 
 tst r2,%0001000000 ; up
 bne endUp
+tst r8,%0001000000
+beq endUp
 cmp r3,11
 addle r3,r3,3
 endUp:
 
 tst r2,%0000100000 ; left
 bne endLeft
+tst r8,%0000100000
+beq endLeft
 cmp r3,1
 subge r3,r3,1
 endLeft:
 
 tst r2,%0000010000 ; right
 bne endRight
+tst r8,%0000010000
+beq endRight
 cmp r3,13
 addle r3,r3,1
 endRight:
 
 tst r2,%0000000001 ; a
 bne endA
+tst r8,%0000000001
+beq endA
 	; handle numbers
 	cmp r3,5 ; check if number
 	subge r6,r3,5
@@ -101,6 +113,8 @@ endA:
 
 tst r2,%0000000010 ; b
 bne endB
+tst r8,%0000000010
+beq endB
 	mov r6,0
 	divTenLoop:
 		subs r4,r4,10
@@ -111,8 +125,14 @@ bne endB
 endB:
 
 tst r2,%0000000100 ; select
-streq r5,[r13,-4]!
-moveq r5,r4
-moveq r4,0
+bne endSelect
+tst r8,%0000000100
+beq endSelect
+str r5,[r13,-4]!
+mov r5,r4
+mov r4,0
+endSelect:
+
+mov r8,r2 ; copy key selection into old key selection
 
 b mainLoop
