@@ -1,21 +1,61 @@
 b start
 
 @include header.asm
+@include sprites.asm
 
 start:
 mov r0,0x4000000
-mov r1,(%00010000 << 8)
-orr r1,r1,%01000000
+mov r1,%0001000100000000
 strh r1,[r0]
 
-mov r1,0x6000000
+mov r1,%0000000100000000
+strh r1,[r0,0x8]
+
+transferPalette:
+	addr r1,palette
+	str r1,[r0,0xD4]
+
+	; background
+	mov r2,0x5000000
+	str r2,[r0,0xD8]
+
+	mov r3,(%10000100000 << 21)
+	orr r3,r3,2
+	str r3,[r0,0xDC]
+
+	; OBJ
+	orr r2,r2,0x200
+	str r2,[r0,0xD8]
+
+	str r3,[r0,0xDC]
+
+transferSprites:
+	addr r1,spritesStart
+	str r1,[r0,0xD4]
+
+	; background
+	mov r2,0x6000000
+	str r2,[r0,0xD8]
+
+	mov r3,(%10000100000 << 21)
+	orr r3,r3,(8 * 18)
+	str r3,[r0,0xDC]
+
+	; OBJ
+	orr r2,r2,0x10000
+	orr r2,r2,0x20
+	str r2,[r0,0xD8]
+
+	str r3,[r0,0xDC]
+
+mov r1,0x7000000
 
 mov r3,10
 mvn r8,0
 
 mainLoop:
 ; r0 I/O reg
-; r1 VRAM
+; r1 OAM
 ; r2 Key Input / Other
 ; r3 Selection
 ; r4 X
