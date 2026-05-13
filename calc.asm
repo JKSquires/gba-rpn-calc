@@ -68,7 +68,7 @@ createBackground:
 	numKeyLoop:
 		strh r2,[r1],-2
 		sub r2,r2,1
-		and r3,r1,3
+		and r3,r1,7
 		cmp r3,0
 		bne numKeyLoop
 
@@ -80,7 +80,7 @@ createBackground:
 	otherKeyLoop:
 		strh r2,[r1],-2
 		add r2,r2,1
-		and r3,r1,3
+		and r3,r1,7
 		cmp r3,0
 		bne otherKeyLoop
 
