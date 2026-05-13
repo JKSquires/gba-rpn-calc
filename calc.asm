@@ -63,28 +63,28 @@ createBackground:
 	strh r2,[r1,0x42]
 
 	; keypad
-	orr r1,r1,0xC1
+	orr r1,r1,0xC6
 	mov r2,9
 	numKeyLoop:
-		str r2,[r1],-1
+		str r2,[r1],-2
 		sub r2,r2,1
 		and r3,r1,3
 		cmp r3,0
 		bne numKeyLoop
 
-		add r1,r1,0x43
+		add r1,r1,0x46
 		cmp r2,0
 		bne numKeyLoop
 
 	mov r2,10
 	otherKeyLoop:
-		str r2,[r1],-1
+		str r2,[r1],-2
 		add r2,r2,1
 		and r3,r1,3
 		cmp r3,0
 		bne otherKeyLoop
 
-		add r1,r1,0x43
+		add r1,r1,0x46
 		cmp r2,16
 		bne otherKeyLoop
 
