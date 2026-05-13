@@ -34,7 +34,8 @@ transferSprites:
 	str r1,[r0,0xD4]
 
 	; background
-	mov r2,0x6000000
+	mov r1,0x6000000
+	orr r2,r1,0x20
 	str r2,[r0,0xD8]
 
 	mov r3,(%10000100000 << 21)
@@ -42,11 +43,50 @@ transferSprites:
 	str r3,[r0,0xDC]
 
 	; OBJ
-	orr r2,r2,0x10000
+	orr r2,r1,0x10000
 	orr r2,r2,0x20
 	str r2,[r0,0xD8]
 
 	str r3,[r0,0xDC]
+
+createBackground:
+	orr r1,r1,0x800
+
+	mov r2,16 ; 'Y'
+	strh r2,[r1]
+
+	mov r2,13 ; 'x'
+	strh r2,[r1,0x40]
+
+	mov r2,17 ; ':'
+	strh r2,[r1,0x2]
+	strh r2,[r1,0x42]
+
+	; keypad
+	orr r1,r1,0xC1
+	mov r2,9
+	numKeyLoop:
+		str r2,[r1],-1
+		sub r2,r2,1
+		and r3,r1,3
+		cmp r3,0
+		bne numKeyLoop
+
+		add r1,r1,0x43
+		cmp r2,0
+		bne numKeyLoop
+
+	mov r2,10
+	otherKeyLoop:
+		str r2,[r1],-1
+		add r2,r2,1
+		and r3,r1,3
+		cmp r3,0
+		bne otherKeyLoop
+
+		add r1,r1,0x43
+		cmp r2,16
+		bne otherKeyLoop
 
 mov r1,0x7000000
 
