@@ -55,7 +55,7 @@ createBackground:
 	mov r2,16 ; 'Y'
 	strh r2,[r1]
 
-	mov r2,13 ; 'x'
+	mov r2,14 ; 'x'
 	strh r2,[r1,0x40]
 
 	mov r2,17 ; ':'
