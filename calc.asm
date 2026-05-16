@@ -3,6 +3,20 @@ b start
 @include header.asm
 @include sprites.asm
 
+div:
+; r9  dividend
+; r10 divisor
+; r11 quotient
+; r12 remainder
+mov r12,r9
+mov r11,0
+divLoop:
+	subs r12,r12,r10
+	addge r11,r11,1
+	bge divLoop
+add r12,r12,r10
+bx r14
+
 start:
 mov r0,0x4000000
 mov r1,%0001000100000000
@@ -90,6 +104,17 @@ createBackground:
 
 mov r1,0x7000000
 
+createSelector:
+	; OBJ Attr 0
+	mov r3,32
+	strh r3,[r1]
+	; OBJ Attr 1
+	mov r3,16
+	strh r3,[r1,2]
+	; OBJ Attr 2
+	mov r3,18
+	strh r3,[r1,4]
+
 mov r3,10
 mvn r8,0
 
@@ -118,32 +143,70 @@ tst r2,%0010000000 ; down
 bne endDown
 tst r8,%0010000000
 beq endDown
+; update selection
 cmp r3,3
 subge r3,r3,3
+; update selector
+ldrh r6,[r1]
+addge r6,r6,8
+strh r6,[r1]
 endDown:
 
 tst r2,%0001000000 ; up
 bne endUp
 tst r8,%0001000000
 beq endUp
+; update selection
 cmp r3,11
 addle r3,r3,3
+; update selector
+ldrh r6,[r1]
+suble r6,r6,8
+strh r6,[r1]
 endUp:
 
 tst r2,%0000100000 ; left
 bne endLeft
 tst r8,%0000100000
 beq endLeft
+; update selection
 cmp r3,1
-subge r3,r3,1
+blt endLeft
+sub r3,r3,1
+; update selector
+add r9,r3,1
+mov r10,3
+bl div
+cmp r12,0
+ldrh r6,[r1]
+addeq r6,r6,8 ; drop down if edge
+strh r6,[r1]
+ldrh r6,[r1,2]
+addeq r6,r6,16 ; move right if edge
+subne r6,r6,8 ; else move left
+strh r6,[r1,2]
 endLeft:
 
 tst r2,%0000010000 ; right
 bne endRight
 tst r8,%0000010000
 beq endRight
+; update selection
 cmp r3,13
-addle r3,r3,1
+bgt endRight
+add r3,r3,1
+; update selector
+mov r9,r3
+mov r10,3
+bl div
+cmp r12,0
+ldrh r6,[r1]
+subeq r6,r6,8 ; pop up if edge
+strh r6,[r1]
+ldrh r6,[r1,2]
+subeq r6,r6,16 ; move left if edge
+addne r6,r6,8 ; else move right
+strh r6,[r1,2]
 endRight:
 
 tst r2,%0000000001 ; a
@@ -176,12 +239,10 @@ beq endA
 
 	cmp r3,0 ; divide
 	bne endDiv
-	mov r6,0
-	divLoop:
-		subs r5,r5,r4
-		addge r6,r6,1
-		bge divLoop
-	mov r4,r6
+	mov r9,r5
+	mov r10,r4
+	bl div
+	mov r4,r11
 	ldr r5,[r13],4
 	b endA
 	endDiv:
@@ -195,12 +256,10 @@ tst r2,%0000000010 ; b
 bne endB
 tst r8,%0000000010
 beq endB
-	mov r6,0
-	divTenLoop:
-		subs r4,r4,10
-		addge r6,r6,1
-		bge divTenLoop
-	mov r4,r6
+mov r9,r4
+mov r10,10
+bl div
+mov r4,r11
 	b endB
 endB:
 
