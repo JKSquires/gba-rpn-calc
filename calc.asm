@@ -4,10 +4,10 @@ b start
 @include sprites.asm
 
 div:
-	; r9  dividend
-	; r10 divisor
-	; r11 quotient
-	; r12 remainder
+	; r9  dividend (in)
+	; r10 divisor (in)
+	; r11 quotient (out)
+	; r12 remainder (out)
 	stmfd r13!,{r0-r1,r3}
 
 	mov r0,r9
@@ -21,9 +21,9 @@ div:
 
 
 updateRegDisp:
-	; r1 OAM
-	; r4 X
-	; r5 Y
+	; r1 OAM (in)
+	; r4 X (in)
+	; r5 Y (in)
 
 	; y register uses sprites 1-11
 	; x register uses sprites 12-23
@@ -86,6 +86,59 @@ updateRegDisp:
 
 
 	ldmfd r13!,{r0,r2,r6-r12,r14}
+	bx r14
+
+
+handleSelection:
+	; r3 Selection (in)
+	; r4 X (in)
+	; r5 Y (in)
+
+	mov r6,0x3000000
+	str r14,[r6] ; store r14 in WRAM
+
+	; handle numbers
+	cmp r3,5 ; check if number
+	blt endANum
+	sub r6,r3,5 ; get num from position
+	mov r7,10
+	mul r4,r4,r7
+	tst r4,%10000000000000000000000000000000 ; handle direction if negative
+	addeq r4,r4,r6
+	subne r4,r4,r6
+	endANum:
+
+	; handle math functions
+	cmp r3,4 ; add
+	addeq r4,r5,r4
+	beq endMathFunc
+
+	cmp r3,3 ; subtract
+	subeq r4,r5,r4
+	beq endMathFunc
+
+	cmp r3,1 ; multiply
+	muleq r4,r5,r4
+	beq endMathFunc
+
+	cmp r3,0 ; divide
+	bne skipDiv
+	mov r9,r5
+	mov r10,r4
+	bl div
+	mov r4,r11
+	endMathFunc:
+	ldr r5,[r13],4 ; pop one off stack into r5
+	skipDiv:
+
+	; handle clear
+	cmp r3,2 ; c
+	moveq r4,0
+
+	bl updateRegDisp
+
+	mov r6,0x3000000
+	ldr r14,[r6] ; grab return from WRAM
 	bx r14
 
 
@@ -311,46 +364,38 @@ tst r2,%0000000001 ; a
 bne endA
 tst r8,%0000000001 ; test if key just pressed
 beq endA
-	; handle numbers
-	cmp r3,5 ; check if number
-	blt endANum
-	sub r6,r3,5 ; get num from position
-	mov r7,10
-	mul r4,r4,r7
-	tst r4,%10000000000000000000000000000000 ; handle direction if negative
-	addeq r4,r4,r6
-	subne r4,r4,r6
-	endANum:
-
-	; handle math functions
-	cmp r3,4 ; add
-	addeq r4,r5,r4
-	beq endMathFunc
-
-	cmp r3,3 ; subtract
-	subeq r4,r5,r4
-	beq endMathFunc
-
-	cmp r3,1 ; multiply
-	muleq r4,r5,r4
-	beq endMathFunc
-
-	cmp r3,0 ; divide
-	bne skipDiv
-	mov r9,r5
-	mov r10,r4
-	bl div
-	mov r4,r11
-	endMathFunc:
-	ldr r5,[r13],4 ; pop one off stack into r5
-	skipDiv:
-
-	; handle clear
-	cmp r3,2 ; c
-	moveq r4,0
-
-	bl updateRegDisp
+	bl handleSelection
 endA:
+
+tst r2,%1000000000 ; l
+bne endL
+tst r8,%1000000000 ; test if key just pressed
+beq endL
+	cmp r3,0
+	bgt LShift
+	LKeep:
+		bl handleSelection
+		b endL
+	LShift:
+		sub r3,r3,1
+		bl handleSelection
+		add r3,r3,1
+endL:
+
+tst r2,%0100000000 ; r
+bne endR
+tst r8,%0100000000 ; test if key just pressed
+beq endR
+	cmp r3,14
+	blt RShift
+	RKeep:
+		bl handleSelection
+		b endR
+	RShift:
+		add r3,r3,1
+		bl handleSelection
+		sub r3,r3,1
+endR:
 
 tst r2,%0000000010 ; b
 bne endB
