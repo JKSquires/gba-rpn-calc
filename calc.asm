@@ -94,8 +94,7 @@ handleSelection:
 	; r4 X (in)
 	; r5 Y (in)
 
-	mov r6,0x3000000
-	str r14,[r6] ; store r14 in WRAM
+	mov r0,r14
 
 	; handle numbers
 	cmp r3,5 ; check if number
@@ -137,8 +136,8 @@ handleSelection:
 
 	bl updateRegDisp
 
-	mov r6,0x3000000
-	ldr r14,[r6] ; grab return from WRAM
+	mov r14,r0
+	mov r0,0x4000000
 	bx r14
 
 
