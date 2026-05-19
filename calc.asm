@@ -144,7 +144,7 @@ handleSelection:
 
 start:
 mov r0,0x4000000
-mov r1,%0001000100000000 ; turn on OBJ and BG0 screens
+mov r1,%0001000100000000 ; turn on OBJ and BG0 screens and use BG mode 0
 strh r1,[r0]
 
 mov r1,%0000000100000000 ; set BG0 screen base block to 1
